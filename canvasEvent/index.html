@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="../logo.png">
+    <title>Canvas事件交互</title>
+    <script src="./painter.js"></script>
+    <style>
+        canvas {
+            outline: 1px solid red;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>绘制图形</h2>
+    <canvas width="700px" height="300px" onclick="doit()"></canvas>
+
+    <h2>记录区域</h2>
+    <canvas width="700px" height="300px"></canvas>
+
+    <script>
+        var drawPainter = document.getElementsByTagName('canvas')[0].getContext('2d');
+        var regionPainter = document.getElementsByTagName('canvas')[1].getContext('2d', {
+
+            // https://html.spec.whatwg.org/multipage/canvas.html#concept-canvas-will-read-frequently
+            willReadFrequency: true
+        });
+
+        var painter = painterRender(drawPainter, regionPainter);
+
+        // 绘制
+        painter.config({
+            fillStyle: "red"
+        })
+            .setRegion('#1')
+            .fillRect(50, 50, 50, 50)
+
+            .setRegion('#2')
+            .fillRect(75, 75, 50, 50)
+
+            .config({
+                fillStyle: "green"
+            })
+            .fillRect(125, 125, 50, 50);
+
+        function doit() {
+            var regionName = painter.getRegion(window.event);
+            console.log(regionName);
+        }
+
+    </script>
+
+</body>
+
+</html>
