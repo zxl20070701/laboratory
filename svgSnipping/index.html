@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>利用SVG把DOM变成图片</title>
+    <script src="./elToTemplate.js"></script>
+    <script src="./elToImage.js"></script>
+    <style>
+        img,
+        #source {
+            outline: 1px solid red;
+        }
+
+        #source {
+            width: 300px;
+            height: 160px;
+            background-color: aliceblue;
+        }
+
+        ul {
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>原始内容</h2>
+    <div id="source">
+        <span>标题</span>
+        <ul>
+            <li>1</li>
+            <li>2</li>
+            <li style="font-size:30px">3</li>
+        </ul>
+    </div>
+
+    <h2>截图结果</h2>
+    <img id="img">
+
+    <script>
+
+        elToImage(document.getElementById('source')).then(base64 => {
+            console.log(base64);
+            document.getElementById('img').setAttribute('src', base64)
+        });
+
+    </script>
+
+</body>
+
+</html>
