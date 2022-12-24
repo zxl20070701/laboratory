@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebGL中绘制文字</title>
+
+    <!-- 顶点着色器 -->
+    <script type='x-shader/x-vertex' id='vs'>
+        attribute vec4 a_position;
+        attribute vec2 a_textcoord;
+        varying vec2 v_textcoord;
+        void main(){
+            gl_Position = a_position;
+            v_textcoord=a_textcoord;
+        }
+    </script>
+
+    <!-- 片段着色器 -->
+    <script type='x-shader/x-fragment' id='fs'>
+        precision mediump float;
+        uniform sampler2D u_sampler;
+        varying vec2 v_textcoord;
+        void main(){
+            gl_FragColor=texture2D(u_sampler,v_textcoord);
+        }
+    </script>
+</head>
+
+<body>
+
+    <h4>绘制</h4>
+    <canvas width="300" height="300">非常抱歉，您的浏览器不支持canvas!</canvas>
+
+    <h4>资源</h4>
+    <canvas width="100" height="100">非常抱歉，您的浏览器不支持canvas!</canvas>
+
+    <script>
+
+        var canvas = document.getElementsByTagName('canvas')[1];
+        var painter = canvas.getContext('2d');
+        painter.font = '26px sans-serif';
+        painter.textAlign = 'center';
+        painter.textBaseline = 'middle';
+        painter.fillText('你好呀', 50, 50);
+
+        setTimeout(function () {
+            // 先获取gl
+            var gl = document.getElementsByTagName('canvas')[0].getContext('webgl');
+
+            // 定义一个把着色器字符串加载成着色器对象的函数
+            var loadShader = function (type, source) {
+
+                // 创建着色器对象
+                var shader = gl.createShader(type);
+
+                // 绑定资源
+                gl.shaderSource(shader, source);
+
+                // 编译着色器
+                gl.compileShader(shader);
+
+                return shader;
+            };
+
+            // 分别加载顶点着色器对象和片段着色器对象
+            var vertexShader = loadShader(gl.VERTEX_SHADER, document.getElementById('vs').innerHTML),
+                fragmentShader = loadShader(gl.FRAGMENT_SHADER, document.getElementById('fs').innerHTML);
+
+            // 创建一个着色器程序
+            var glProgram = gl.createProgram();
+
+            // 把前面创建的两个着色器对象添加到着色器程序中
+            gl.attachShader(glProgram, vertexShader);
+            gl.attachShader(glProgram, fragmentShader);
+
+            // 把着色器程序链接成一个完整的程序
+            gl.linkProgram(glProgram);
+
+            // 使用这个完整的程序
+            gl.useProgram(glProgram);
+
+            // 数据
+            var data = new Float32Array([
+                // 顶点坐标3，纹理坐标2
+                -0.25, 0.25, 0, 0.0, 0.0,
+                -0.25, -0.25, 0, 0.0, 1.0,
+                0.25, 0.25, 0, 1.0, 0.0,
+                0.25, -0.25, 0, 1.0, 1.0
+            ]);
+
+            // 创建一个缓冲区
+            var buffer = gl.createBuffer();
+
+            // 把缓冲区对象绑定到目标
+            gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+
+            // 数据写入缓冲区
+            gl.bufferData(gl.ARRAY_BUFFER, data, gl.STATIC_DRAW);
+
+            // 写入缓冲区的数据分配
+            var useArray = [
+                ['a_position', 3, 5, 0],
+                ['a_textcoord', 2, 5, 3]
+            ];
+            for (var i = 0; i < useArray.length; i++) {
+
+                var location = gl.getAttribLocation(glProgram, useArray[i][0]);
+
+                // 把缓冲区对象分配给目标变量
+                gl.vertexAttribPointer(location, useArray[i][1], gl.FLOAT, false, useArray[i][2] * data.BYTES_PER_ELEMENT, useArray[i][3] * data.BYTES_PER_ELEMENT);
+
+                // 连接目标对象和缓冲区对象
+                gl.enableVertexAttribArray(location);
+            }
+
+            // 创建纹理对象
+            var texture = gl.createTexture();
+
+            // 开启纹理单元，编号1
+            gl.activeTexture(gl.TEXTURE1);
+
+            // 绑定纹理对象到目标上
+            gl.bindTexture(gl.TEXTURE_2D, texture);
+
+            // 配置纹理（默认配置）
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
+            var image = new Image();
+            image.onload = function () {
+
+                // 链接资源图片
+                gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+
+                // 设置纹理单元
+                gl.uniform1i(gl.getUniformLocation(glProgram, 'u_sampler'), 1);
+
+                // 绘制
+                gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+            };
+            image.src = canvas.toDataURL();
+        });
+
+
+    </script>
+
+</body>
+
+</html>

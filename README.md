@@ -14,6 +14,7 @@
 - [customElements自定义标签](./customElements)
 - [禁止 debugger](./no-debugger)
 - [WebGL中获取指定xOy位置颜色](./webglGetColor)
+- [WebGL中绘制文字](./webglText)
 
 这里包括的主要是[ 《notebook 笔记》 ](https://zxl20070701.github.io/notebook/)和[ 《toolbox 工具》 ](https://zxl20070701.github.io/toolbox/)不好包含的内容～
 
